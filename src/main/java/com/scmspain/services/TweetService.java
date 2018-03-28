@@ -29,17 +29,21 @@ public class TweetService {
       Result - recovered Tweet
     */
     public void publishTweet(String publisher, String text) {
-        if (publisher != null && publisher.length() > 0 && text != null && text.length() > 0 && text.length() < 140) {
+        if (text == null  || text.length() == 0) {
+            throw new IllegalArgumentException("Tweet should not be empty.");
+        } else if (140 < text.length()) {
+            throw new IllegalArgumentException("Tweet should have at most 140 characters.");
+        } else if (publisher == null || publisher.length() == 0) {
+            throw new IllegalArgumentException("Publisher should not be empty.");
+        } else {
             Tweet tweet = new Tweet();
             tweet.setTweet(text);
             tweet.setPublisher(publisher);
-
             this.metricWriter.increment(new Delta<Number>("published-tweets", 1));
             this.entityManager.persist(tweet);
-        } else {
-            throw new IllegalArgumentException("Tweet must not be greater than 140 characters");
         }
     }
+
 
     /**
       Recover tweet from repository
