@@ -1,6 +1,8 @@
 package com.scmspain.services;
 
 import com.scmspain.entities.Tweet;
+import com.scmspain.validators.TweetValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.writer.Delta;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.stereotype.Service;
@@ -16,10 +18,12 @@ import java.util.List;
 public class TweetService {
     private EntityManager entityManager;
     private MetricWriter metricWriter;
+    private TweetValidator tweetValidator;
 
-    public TweetService(EntityManager entityManager, MetricWriter metricWriter) {
+    public TweetService(EntityManager entityManager, MetricWriter metricWriter, TweetValidator tweetValidator) {
         this.entityManager = entityManager;
         this.metricWriter = metricWriter;
+        this.tweetValidator = tweetValidator;
     }
 
     /**
@@ -28,16 +32,10 @@ public class TweetService {
       Parameter - text - Content of the Tweet
       Result - recovered Tweet
     */
-    public void publishTweet(String publisher, String text) {
-        if (text == null  || text.length() == 0) {
-            throw new IllegalArgumentException("Tweet should not be empty.");
-        } else if (140 < text.length()) {
-            throw new IllegalArgumentException("Tweet should have at most 140 characters.");
-        } else if (publisher == null || publisher.length() == 0) {
-            throw new IllegalArgumentException("Publisher should not be empty.");
-        } else {
+    public void publishTweet(String publisher, String tweetText) {
+        if (tweetValidator.isValid(publisher, tweetText)) {
             Tweet tweet = new Tweet();
-            tweet.setTweet(text);
+            tweet.setTweet(tweetText);
             tweet.setPublisher(publisher);
             this.metricWriter.increment(new Delta<Number>("published-tweets", 1));
             this.entityManager.persist(tweet);
