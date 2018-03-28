@@ -25,8 +25,12 @@ public class TweetController {
 
     @PostMapping("/tweet")
     @ResponseStatus(CREATED)
-    public void publishTweet(@RequestBody PublishTweetCommand publishTweetCommand) {
-        this.tweetService.publishTweet(new Tweet(publishTweetCommand.getPublisher(), publishTweetCommand.getTweet()));
+    public void publishTweet(@RequestBody PublishTweetCommand command) {
+        Tweet t = new Tweet.TweetBuilder().
+                setPublisher(command.getPublisher()).
+                setTweet(command.getTweet()).
+                build();
+        this.tweetService.publishTweet(t);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

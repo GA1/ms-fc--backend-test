@@ -17,6 +17,8 @@ public class TweetServiceTest {
     private TweetValidator tweetValidator;
     private TweetService tweetService;
 
+    private Tweet tweet;
+
     @Before
     public void setUp() throws Exception {
         this.entityManager = mock(EntityManager.class);
@@ -29,14 +31,22 @@ public class TweetServiceTest {
     @Test (expected = IllegalArgumentException.class)
     public void invalidTweetIsNotPersisted() throws Exception {
         when(tweetValidator.isValid(any(Tweet.class))).thenThrow(new IllegalArgumentException());
-        tweetService.publishTweet(new Tweet(null, null));
+        tweet = new Tweet.TweetBuilder()
+                .setPublisher(null)
+                .setTweet(null)
+                .build();
+        tweetService.publishTweet(new Tweet.TweetBuilder().setPublisher(null).setTweet(null).build());
         verify(entityManager, never()).persist(any(Tweet.class));
     }
 
     @Test
     public void validTweetIsPersisted() throws Exception {
         when(tweetValidator.isValid(any(Tweet.class))).thenReturn(true);
-        tweetService.publishTweet(new Tweet("correct publisher", "Correct tweeet text"));
+        tweet = new Tweet.TweetBuilder()
+                .setPublisher("correct publisher")
+                .setTweet("correct tweet text")
+                .build();
+        tweetService.publishTweet(tweet);
         verify(entityManager).persist(any(Tweet.class));
     }
 
