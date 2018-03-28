@@ -6,15 +6,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class TweetValidator {
 
+    private UrlRemover urlRemover;
+
+    public TweetValidator(UrlRemover urlRemover) {
+        this.urlRemover = urlRemover;
+    }
+
     public boolean isValid(Tweet t) {
         String tweetText = t.getTweet();
-        if (tweetText == null  || tweetText.length() == 0) {
+        if (tweetText == null  || tweetText.length() == 0)
             throw new IllegalArgumentException("Tweet should not be empty.");
-        } else if (140 < tweetText.length()) {
+        String textWithoutUrls = urlRemover.getTextWithoutUrls(tweetText);
+        if (140 < textWithoutUrls.length())
             throw new IllegalArgumentException("Tweet should have at most 140 characters.");
-        } else if (t.getPublisher() == null || t.getPublisher().length() == 0) {
+        else if (t.getPublisher() == null || t.getPublisher().length() == 0)
             throw new IllegalArgumentException("Publisher should not be empty.");
-        } else
+        else
             return true;
     }
 }

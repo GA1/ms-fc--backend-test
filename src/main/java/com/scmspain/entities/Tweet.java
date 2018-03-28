@@ -12,7 +12,15 @@ public final class Tweet {
     private Long id;
     @Column(nullable = false)
     private String publisher;
-    @Column(nullable = false, length = 140)
+    /**
+      Todo for future versions define the limits for tweet's length and number of urls it can have
+
+      We can assume that a message including a url is not longer than 1000. This should be rethought.
+      It's more complicated than that on the real Twitter.
+      Leaving this number forever as 1000 gives opportunities for hackers trying to execute
+      time complexity attacks (see the `UrlRemover` class)
+    */
+    @Column(nullable = false, length = 1000)
     private String tweet;
     @Column (nullable=true)
     private Long pre2015MigrationStatus = 0L;
@@ -40,4 +48,11 @@ public final class Tweet {
         return pre2015MigrationStatus;
     }
 
+    @Override
+    public String toString() {
+        return "Tweet(id=" + id +
+                ", publisher=" + publisher +
+                ", tweet=" + tweet +
+                ")";
+    }
 }

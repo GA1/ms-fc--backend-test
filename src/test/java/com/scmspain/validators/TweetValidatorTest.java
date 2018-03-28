@@ -6,15 +6,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 
 public class TweetValidatorTest {
 
     private TweetValidator tweetValidator;
+    private UrlRemover urlRemover;
+
     private boolean result;
 
     @Before
     public void setUp() throws Exception {
-        this.tweetValidator = new TweetValidator();
+        this.tweetValidator = new TweetValidator(new UrlRemover());
+        this.urlRemover = new UrlRemover();
     }
 
     @Test
@@ -34,10 +39,19 @@ public class TweetValidatorTest {
     }
 
     @Test
-    public void tweetWith140characterMessageShouldBeValid() throws Exception {
+    public void shouldConsiderTweetWith140characterMessageToBeValid() throws Exception {
         result = tweetValidator.isValid(new Tweet("Guybrush Threepwood", createTextWithNcharacters(140)));
         assertTrue(result);
     }
+
+    @Test
+    public void shouldConsiderTweetWith140characterPlusUrlMessageToBeValid() throws Exception {
+        String someUrl = "https://www.example.com";
+        String tweetText = createTextWithNcharacters(140) + someUrl;
+        result = tweetValidator.isValid(new Tweet("Guybrush Threepwood", tweetText));
+        assertTrue(result);
+    }
+
 
     @Test
     public void shouldThrowAnExceptionWhenTweenLengthIs141() throws Exception {
