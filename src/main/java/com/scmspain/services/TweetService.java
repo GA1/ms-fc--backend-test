@@ -32,11 +32,8 @@ public class TweetService {
       Parameter - text - Content of the Tweet
       Result - recovered Tweet
     */
-    public void publishTweet(String publisher, String tweetText) {
-        if (tweetValidator.isValid(publisher, tweetText)) {
-            Tweet tweet = new Tweet();
-            tweet.setTweet(tweetText);
-            tweet.setPublisher(publisher);
+    public void publishTweet(Tweet tweet) {
+        if (tweetValidator.isValid(tweet)) {
             this.metricWriter.increment(new Delta<Number>("published-tweets", 1));
             this.entityManager.persist(tweet);
         }

@@ -1,5 +1,6 @@
 package com.scmspain.services;
 
+import com.scmspain.entities.Tweet;
 import com.scmspain.validators.TweetValidator;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +19,7 @@ public class TweetValidatorTest {
 
     @Test
     public void validTweetShouldBeValid() throws Exception {
-        result = tweetValidator.isValid("Guybrush Threepwood", "I am Guybrush Threepwood, mighty pirate.");
+        result = tweetValidator.isValid(new Tweet("Guybrush Threepwood", "I am Guybrush Threepwood, mighty pirate."));
         assertTrue(result);
     }
 
@@ -34,7 +35,7 @@ public class TweetValidatorTest {
 
     @Test
     public void tweetWith140characterMessageShouldBeValid() throws Exception {
-        result = tweetValidator.isValid("Guybrush Threepwood", createTextWithNcharacters(140));
+        result = tweetValidator.isValid(new Tweet("Guybrush Threepwood", createTextWithNcharacters(140)));
         assertTrue(result);
     }
 
@@ -64,7 +65,7 @@ public class TweetValidatorTest {
     private void assertTweetThrowsIllegalArgumentExceptionWithMessage(
             String publisher, String tweetText, String expectedMessage) {
         try {
-            tweetValidator.isValid(publisher, tweetText);
+            tweetValidator.isValid(new Tweet(publisher, tweetText));
             fail("");
         } catch(IllegalArgumentException e) {
             assertEquals(expectedMessage, e.getMessage());
