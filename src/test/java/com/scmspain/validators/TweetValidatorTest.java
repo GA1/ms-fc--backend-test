@@ -1,4 +1,4 @@
-package com.scmspain.services;
+package com.scmspain.validators;
 
 import com.scmspain.entities.Tweet;
 import com.scmspain.validators.TweetValidator;
