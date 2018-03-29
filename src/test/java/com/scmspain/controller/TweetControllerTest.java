@@ -39,7 +39,7 @@ public class TweetControllerTest {
     private String content;
     private List<Tweet> tweets, discardedTweets;
     private long id, id1, id2;
-    private String publisher;
+    private String publisher, publisher1, publisher2;
 
     @Before
     public void setUp() {
@@ -114,9 +114,49 @@ public class TweetControllerTest {
 
     @Test
     @Transactional
-    public void listOfDiscardedTweetsShouldContainDiscardedTweetsSortedByDateOfDiscarding() throws Exception {
+    public void listOfDiscardedTweetsShouldContainNoTweetsIfNoTweetWasDiscarded() throws Exception {
         discardedTweets = ensureListOfDiscardedTweetsReturns200AndGetTweets();
         assertThat(discardedTweets.size()).isEqualTo(0);
+    }
+
+    @Test
+    @Transactional
+    public void listOfDiscardedTweetsShouldContainOnlyDiscardedTweets() throws Exception {
+        mockMvc.perform(publishTweet("A80", "B80"))
+                .andExpect(status().is(201));
+        mockMvc.perform(publishTweet("A90", "B90"))
+                .andExpect(status().is(201));
+        tweets = ensureListOfTweetsReturns200AndGetTweets();
+        id1 = tweets.get(0).getId();
+        id2 = tweets.get(1).getId();
+        publisher = tweets.get(0).getPublisher();
+        mockMvc.perform(discardTweet(id1)).andExpect(status().is(200));
+
+        discardedTweets = ensureListOfDiscardedTweetsReturns200AndGetTweets();
+        assertThat(discardedTweets.size()).isEqualTo(1);
+        assertThat(discardedTweets.get(0).getPublisher()).isEqualTo(publisher);
+    }
+
+    @Test
+    @Transactional
+    public void listOfDiscardedTweetsShouldContainDiscardedTweetsSortedByDateOfDiscarding() throws Exception {
+        mockMvc.perform(publishTweet("A80", "B80"))
+                .andExpect(status().is(201));
+        mockMvc.perform(publishTweet("A90", "B90"))
+                .andExpect(status().is(201));
+        tweets = ensureListOfTweetsReturns200AndGetTweets();
+        id1 = tweets.get(0).getId();
+        id2 = tweets.get(1).getId();
+        publisher1 = tweets.get(0).getPublisher();
+        publisher2 = tweets.get(1).getPublisher();
+        mockMvc.perform(discardTweet(id1)).andExpect(status().is(200));
+        TimeUnit.SECONDS.sleep(1);
+        mockMvc.perform(discardTweet(id2)).andExpect(status().is(200));
+
+        discardedTweets = ensureListOfDiscardedTweetsReturns200AndGetTweets();
+        assertThat(discardedTweets.size()).isEqualTo(2);
+        assertThat(discardedTweets.get(0).getPublisher()).isEqualTo(publisher2);
+        assertThat(discardedTweets.get(1).getPublisher()).isEqualTo(publisher1);
     }
 
     private List<Tweet> ensureListOfDiscardedTweetsReturns200AndGetTweets() throws Exception {
@@ -138,15 +178,19 @@ public class TweetControllerTest {
     }
 
     private MockHttpServletRequestBuilder publishTweet(String publisher, String tweet) {
-        return post("/tweet")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(format("{\"publisher\": \"%s\", \"tweet\": \"%s\"}", publisher, tweet));
+        return postContentToPath(format("{\"publisher\": \"%s\", \"tweet\": \"%s\"}", publisher, tweet), "/tweet");
     }
 
     private MockHttpServletRequestBuilder discardTweet(long id) {
-        return post("/discarded")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(format("{\"tweet\": \"%s\"}", id));
+        return postContentToPath(format("{\"tweet\": \"%s\"}", id), "/discarded");
     }
+
+    private MockHttpServletRequestBuilder postContentToPath(String content, String path) {
+        return post(path)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(content);
+    }
+
+
 
 }
