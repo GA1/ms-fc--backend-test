@@ -74,13 +74,4 @@ public class TweetServiceTest {
         verify(entityManager).persist(any(Tweet.class));
     }
 
-    @Test
-    public void discardTweetsReturns0TweetsIfNoTweetsWereDiscarded() throws Exception {
-        tweets = tweetService.listAllDiscardedTweets();
-
-        assertEquals(0, tweets.size());
-    }
-
-
-
 }

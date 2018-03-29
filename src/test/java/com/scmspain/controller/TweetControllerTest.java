@@ -160,7 +160,17 @@ public class TweetControllerTest {
     }
 
     private List<Tweet> ensureListOfDiscardedTweetsReturns200AndGetTweets() throws Exception {
-        mvcResult = mockMvc.perform(get("/discarded"))
+        List<Tweet> result = ensureGetPathReturns200AndGetTweets("/discarded");
+        return result;
+    }
+
+    private List<Tweet> ensureListOfTweetsReturns200AndGetTweets() throws Exception {
+        List<Tweet> result = ensureGetPathReturns200AndGetTweets("/tweet");
+        return result;
+    }
+
+    private List<Tweet> ensureGetPathReturns200AndGetTweets(String path) throws Exception {
+        mvcResult = mockMvc.perform(get(path))
                 .andExpect(status().is(200))
                 .andReturn();
         content = mvcResult.getResponse().getContentAsString();
@@ -168,14 +178,6 @@ public class TweetControllerTest {
         return result;
     }
 
-    private List<Tweet> ensureListOfTweetsReturns200AndGetTweets() throws Exception {
-        mvcResult = mockMvc.perform(get("/tweet"))
-                .andExpect(status().is(200))
-                .andReturn();
-        content = mvcResult.getResponse().getContentAsString();
-        List<Tweet> result = new ObjectMapper().readValue(content, new TypeReference<List<Tweet>>(){});
-        return result;
-    }
 
     private MockHttpServletRequestBuilder publishTweet(String publisher, String tweet) {
         return postContentToPath(format("{\"publisher\": \"%s\", \"tweet\": \"%s\"}", publisher, tweet), "/tweet");
