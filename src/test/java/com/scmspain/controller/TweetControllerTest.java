@@ -21,6 +21,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,7 +37,8 @@ public class TweetControllerTest {
 
     private String content;
     private List<Tweet> tweets;
-    private long id;
+    private long id, id1, id2;
+    private String publisher;
 
     @Before
     public void setUp() {
@@ -52,23 +54,26 @@ public class TweetControllerTest {
 
     @Test
     @Transactional
-    public void shouldReturn201WhenInsertingTweetATweetWithMessageLowerThan140PlusALongUrl() throws Exception {
-        mockMvc.perform(publishTweet("Schibsted Spain", "We are Schibsted Spain (look at our home page http://www.very-long-domain-which-belongs-to.schibsted.es/), we own Vibbo, InfoJobs, fotocasa, coches.net and milanuncios. Welcome!"))
-                .andExpect(status().is(201));
+    public void shouldCorrectlyListAPublishedTweet() throws Exception {
+        mockMvc.perform(publishTweet("A20", "B20")).andExpect(status().is(201));
+        tweets = ensureListOfTweetsReturns200AndGetTweets();
+        assertEquals(1, tweets.size());
     }
 
     @Test
     @Transactional
-    public void shouldReturnAllPublishedTweets() throws Exception {
-        mockMvc.perform(publishTweet("Yo", "How are you?"))
+    public void shouldCorrectlyList2PublishedTweets() throws Exception {
+        mockMvc.perform(publishTweet("A30", "B30")).andExpect(status().is(201));
+        mockMvc.perform(publishTweet("A40", "B40")).andExpect(status().is(201));
+        tweets = ensureListOfTweetsReturns200AndGetTweets();
+        assertEquals(2, tweets.size());
+    }
+
+    @Test
+    @Transactional
+    public void shouldReturn201WhenInsertingTweetATweetWithMessageLowerThan140PlusALongUrl() throws Exception {
+        mockMvc.perform(publishTweet("Schibsted Spain", "We are Schibsted Spain (look at our home page http://www.very-long-domain-which-belongs-to.schibsted.es/), we own Vibbo, InfoJobs, fotocasa, coches.net and milanuncios. Welcome!"))
                 .andExpect(status().is(201));
-
-        MvcResult getResult = mockMvc.perform(get("/tweet"))
-                .andExpect(status().is(200))
-                .andReturn();
-
-        String content = getResult.getResponse().getContentAsString();
-        assertThat(new ObjectMapper().readValue(content, List.class).size()).isEqualTo(1);
     }
 
     @Test
@@ -84,7 +89,26 @@ public class TweetControllerTest {
         tweets = ensureListOfTweetsReturns200AndGetTweets();
         id = tweets.get(0).getId();
         mockMvc.perform(discardTweet(id)).andExpect(status().is(200));
+    }
 
+    @Test
+    @Transactional
+    public void shouldNotReturnDiscardedTweets() throws Exception {
+        mockMvc.perform(publishTweet("A60", "B60"))
+                .andExpect(status().is(201));
+        mockMvc.perform(publishTweet("A70", "B70"))
+                .andExpect(status().is(201));
+        tweets = ensureListOfTweetsReturns200AndGetTweets();
+        id1 = tweets.get(0).getId();
+        id2 = tweets.get(1).getId();
+        publisher = tweets.get(1).getPublisher();
+        mockMvc.perform(discardTweet(id1)).andExpect(status().is(200));
+
+        tweets = ensureListOfTweetsReturns200AndGetTweets();
+        id = tweets.get(0).getId();
+        assertThat(tweets.size()).isEqualTo(1);
+        assertThat(tweets.get(0).getId()).isEqualTo(id2);
+        assertThat(tweets.get(0).getPublisher()).isEqualTo(publisher);
     }
 
     private List<Tweet> ensureListOfTweetsReturns200AndGetTweets() throws Exception {

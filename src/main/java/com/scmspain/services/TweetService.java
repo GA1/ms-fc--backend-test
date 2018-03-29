@@ -68,7 +68,7 @@ public class TweetService {
     public List<Tweet> listAllTweets() {
         List<Tweet> result = new ArrayList<Tweet>();
         this.metricWriter.increment(new Delta<Number>("times-queried-tweets", 1));
-        TypedQuery<Long> query = this.entityManager.createQuery("SELECT id FROM Tweet AS tweetId WHERE pre2015MigrationStatus<>99 ORDER BY id DESC", Long.class);
+        TypedQuery<Long> query = this.entityManager.createQuery("SELECT id FROM Tweet AS tweetId WHERE discardDate is null and pre2015MigrationStatus<>99 ORDER BY id DESC", Long.class);
         List<Long> ids = query.getResultList();
         for (Long id : ids) {
             result.add(getTweet(id));
