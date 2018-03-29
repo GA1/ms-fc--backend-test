@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +37,7 @@ public class TweetControllerTest {
     private MvcResult mvcResult;
 
     private String content;
-    private List<Tweet> tweets;
+    private List<Tweet> tweets, discardedTweets;
     private long id, id1, id2;
     private String publisher;
 
@@ -109,6 +110,22 @@ public class TweetControllerTest {
         assertThat(tweets.size()).isEqualTo(1);
         assertThat(tweets.get(0).getId()).isEqualTo(id2);
         assertThat(tweets.get(0).getPublisher()).isEqualTo(publisher);
+    }
+
+    @Test
+    @Transactional
+    public void listOfDiscardedTweetsShouldContainDiscardedTweetsSortedByDateOfDiscarding() throws Exception {
+        discardedTweets = ensureListOfDiscardedTweetsReturns200AndGetTweets();
+        assertThat(discardedTweets.size()).isEqualTo(0);
+    }
+
+    private List<Tweet> ensureListOfDiscardedTweetsReturns200AndGetTweets() throws Exception {
+        mvcResult = mockMvc.perform(get("/discarded"))
+                .andExpect(status().is(200))
+                .andReturn();
+        content = mvcResult.getResponse().getContentAsString();
+        List<Tweet> result = new ObjectMapper().readValue(content, new TypeReference<List<Tweet>>(){});
+        return result;
     }
 
     private List<Tweet> ensureListOfTweetsReturns200AndGetTweets() throws Exception {

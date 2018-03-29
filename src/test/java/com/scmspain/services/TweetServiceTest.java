@@ -6,12 +6,14 @@ import com.scmspain.validators.TweetValidator;
 import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.actuate.metrics.writer.Delta;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 
 import javax.persistence.*;
 
 import java.util.*;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -22,6 +24,7 @@ public class TweetServiceTest {
     private TweetService tweetService;
 
     private Tweet tweet;
+    private List<Tweet> tweets;
     private long id;
 
     @Before
@@ -70,6 +73,14 @@ public class TweetServiceTest {
 
         verify(entityManager).persist(any(Tweet.class));
     }
+
+    @Test
+    public void discardTweetsReturns0TweetsIfNoTweetsWereDiscarded() throws Exception {
+        tweets = tweetService.listAllDiscardedTweets();
+
+        assertEquals(0, tweets.size());
+    }
+
 
 
 }

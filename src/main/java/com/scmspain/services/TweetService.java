@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -74,5 +75,9 @@ public class TweetService {
             result.add(getTweet(id));
         }
         return result;
+    }
+
+    public List<Tweet> listAllDiscardedTweets() {
+        return Arrays.asList();
     }
 }

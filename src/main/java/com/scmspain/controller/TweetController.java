@@ -36,6 +36,12 @@ public class TweetController {
         this.tweetService.discardTweet(discardTweetCommand.getTweet());
     }
 
+    @GetMapping("/discarded")
+    @ResponseStatus(OK)
+    public List<Tweet> listAllDiscardedTweets() {
+        return this.tweetService.listAllDiscardedTweets();
+    }
+
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(NOT_FOUND)
     @ResponseBody
