@@ -2,6 +2,7 @@ package com.scmspain.services;
 
 import com.scmspain.entities.Tweet;
 import com.scmspain.validators.TweetValidator;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.writer.Delta;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
@@ -11,6 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -37,6 +39,15 @@ public class TweetService {
             this.metricWriter.increment(new Delta<Number>("published-tweets", 1));
             this.entityManager.persist(tweet);
         }
+    }
+
+    public void discardTweet(Long tweetId) throws NotFoundException {
+        Tweet tweet = getTweet(tweetId);
+        if (tweet == null)
+            throw new NotFoundException("The tweet id does not match any tweet");
+        tweet.setDiscardDate(new Date());
+        this.metricWriter.increment(new Delta<Number>("discarded-tweets", 1));
+        this.entityManager.persist(tweet);
     }
 
 

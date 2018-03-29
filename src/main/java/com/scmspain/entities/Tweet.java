@@ -32,7 +32,7 @@ public final class Tweet {
     private Date discardDate;
 
     public Tweet() {
-        
+
     }
 
     public Tweet(String publisher, String tweet) {
